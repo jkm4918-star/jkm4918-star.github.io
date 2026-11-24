@@ -112,6 +112,7 @@
         title: String(e.title || ''),
         venue: String(e.venue || ''),
         city: String(e.city || ''),
+        detail: String(e.detail || ''),
         note: String(e.note || KIND_LABEL[kind])
       };
     });
@@ -158,6 +159,19 @@
         portrait: String(profile.portrait || ''),
         manifesto: String(profile.manifesto || ''),
         statement: statement.map(String),
+        statementEn: (Array.isArray(profile.statementEn) ? profile.statementEn : []).map(String).filter(Boolean),
+        bioEn: String(profile.bioEn || ''),
+        genreEn: String(profile.genreEn || ''),
+        basedIn: String(profile.basedIn || ''),
+        characters: (Array.isArray(profile.characters) ? profile.characters : []).map(function (c) {
+          c = c || {};
+          return {
+            name: String(c.name || ''),
+            nameKo: String(c.nameKo || ''),
+            role: String(c.role || ''),
+            descEn: String(c.descEn || '')
+          };
+        }).filter(function (c) { return c.name; }),
         instagram: { handle: handle, url: url }
       },
       works: works,
@@ -275,15 +289,17 @@
     }
 
     document.title = (p.name || 'Hedon139') +
-      (p.nameKo ? ' · ' + p.nameKo : '') +
-      ' — ' + (p.tagline || 'Hedon is Everywhere');
+      (p.nameKo ? ' (' + p.nameKo + ')' : '') +
+      ' | 로맨틱 펑크 그래피티 아티스트 공식 포트폴리오';
 
     var desc = $('meta[name="description"]');
     if (desc) {
       desc.setAttribute('content',
         (p.name || 'Hedon139') + (p.nameKo ? '(' + p.nameKo + ')' : '') + ' — ' +
-        (p.genre || 'Romantic Punk') + '. 작품 ' + state.data.works.length + '점, ' +
-        '전시 ' + state.data.exhibitions.length + '회, 벽화 ' + state.data.murals.length + '곳.');
+        '로맨틱 펑크(Romantic Punk) 그래피티·네오 팝아트 작가. ' +
+        '아기 천사 헨젤(Hanzel)과 아기 악마 헤빌(Hevil)로 사랑의 달콤함과 위험한 이면을 그립니다. ' +
+        '작품 ' + state.data.works.length + '점, 전시 ' + state.data.exhibitions.length + '회, ' +
+        '벽화 ' + state.data.murals.length + '곳. 전시·벽화 의뢰는 인스타그램 DM.');
     }
   }
 
@@ -615,6 +631,7 @@
             (e.title ? '<span class="q">《</span>' + esc(e.title) + '<span class="q">》</span>' : '') +
             '</p>' +
             (e.venue || e.city ? '<p class="tl-venue">' + esc([e.venue, e.city].filter(Boolean).join(', ')) + '</p>' : '') +
+            (e.detail ? '<p class="tl-detail">' + esc(e.detail) + '</p>' : '') +
             '</div>' +
             '<span class="tl-kind" data-kind="' + esc(e.kind) + '">' +
             esc(e.note || KIND_LABEL[e.kind] || '') + '</span>' +
@@ -721,6 +738,8 @@
       }
     }
 
+    renderEnglishNote(p);
+
     var facts = $('#facts');
     if (facts) {
       var rows = [];
@@ -728,6 +747,7 @@
         rows.push(['Artist', esc(p.name) + (p.nameKo ? ' <span style="color:var(--muted-2)">/ ' + esc(p.nameKo) + '</span>' : '')]);
       }
       if (p.genre) rows.push(['Genre', esc(p.genre)]);
+      if (p.basedIn) rows.push(['Based in', esc(p.basedIn)]);
       if (p.crew) rows.push(['Crew', esc(p.crew)]);
       rows.push(['Character', '헨젤 <span style="color:var(--muted-2)">(아기 천사)</span> · 헤빌 <span style="color:var(--muted-2)">(아기 악마)</span>']);
       rows.push(['Material', '스프레이 락카 · 젤스톤 · 모델링 페이스트 · 아크릴']);
@@ -738,6 +758,62 @@
       facts.innerHTML = rows.map(function (r) {
         return '<div><dt>' + r[0] + '</dt><dd>' + r[1] + '</dd></div>';
       }).join('');
+    }
+  }
+
+  /* 영문 아티스트 노트 — 해외 큐레이터·심사위원·방문자용 (data/portfolio.json 의 profile.*En) */
+  function renderEnglishNote(p) {
+    var host = $('#artist-note-en');
+    if (!host) return;
+
+    var hasAny = (p.statementEn && p.statementEn.length) || p.bioEn || (p.characters && p.characters.length);
+    host.hidden = !hasAny;
+    if (!hasAny) return;
+
+    var st = $('#statementEn');
+    if (st) {
+      st.innerHTML = (p.statementEn || []).map(function (line) {
+        return '<p>' + esc(line) + '</p>';
+      }).join('');
+    }
+
+    var bio = $('#bioEn');
+    if (bio) {
+      bio.textContent = p.bioEn || '';
+      bio.hidden = !p.bioEn;
+      if (bio.previousElementSibling) bio.previousElementSibling.hidden = !p.bioEn;
+    }
+
+    var facts = $('#enFacts');
+    if (facts) {
+      var rows = [];
+      if (p.genreEn || p.genre) rows.push(['Genre', p.genreEn || p.genre]);
+      if (p.basedIn) rows.push(['Based in', p.basedIn]);
+      if (p.crew) rows.push(['Crew', p.crew]);
+      if (p.instagram.handle && p.instagram.url) {
+        rows.push(['Instagram', '<a href="' + esc(p.instagram.url) + '" target="_blank" rel="noopener">' +
+          esc(p.instagram.handle) + '</a>']);
+      }
+      facts.innerHTML = rows.map(function (r) {
+        return '<div><dt>' + esc(r[0]) + '</dt><dd>' + r[1] + '</dd></div>';
+      }).join('');
+      facts.hidden = !rows.length;
+    }
+
+    var chars = $('#enChars');
+    if (chars) {
+      chars.innerHTML = (p.characters || []).map(function (c) {
+        return '<article class="en-char">' +
+          '<div class="en-char-head">' +
+          '<h4 class="en-char-name">' + esc(c.name) +
+          (c.nameKo ? '<em>' + esc(c.nameKo) + '</em>' : '') + '</h4>' +
+          (c.role ? '<p class="en-char-role">' + esc(c.role) + '</p>' : '') +
+          '</div>' +
+          (c.descEn ? '<p>' + esc(c.descEn) + '</p>' : '') +
+          '</article>';
+      }).join('');
+      var head = chars.previousElementSibling;
+      if (head && !chars.innerHTML) head.hidden = true;
     }
   }
 

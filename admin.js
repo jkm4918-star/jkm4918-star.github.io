@@ -158,6 +158,7 @@
         venue: String(e.venue || ''),
         city: String(e.city || ''),
         title: String(e.title || ''),
+        detail: String(e.detail || ''),
         note: String(e.note || KIND_LABEL[kind])
       };
     });
@@ -215,6 +216,12 @@
         portrait: String(p.portrait || ''),
         manifesto: String(p.manifesto || ''),
         statement: statement,
+        /* 아래 영문 필드는 이 관리자 화면에서 고치지 않고 그대로 보존한다 */
+        statementEn: (Array.isArray(p.statementEn) ? p.statementEn : []).map(String),
+        bioEn: String(p.bioEn || ''),
+        genreEn: String(p.genreEn || ''),
+        basedIn: String(p.basedIn || ''),
+        characters: Array.isArray(p.characters) ? p.characters : [],
         instagram: { handle: handle, url: url }
       },
       works: works,
@@ -930,6 +937,13 @@
     var period = form.period.value.trim();
     var range = parsePeriod(period);
 
+    var prevDetail = '';
+    if (S.editingExhId) {
+      S.data.exhibitions.forEach(function (e) {
+        if (e.id === S.editingExhId) prevDetail = e.detail || '';
+      });
+    }
+
     var item = {
       id: S.editingExhId || uid('x'),
       kind: form.kind.value,
@@ -939,6 +953,7 @@
       venue: form.venue.value.trim(),
       city: form.city.value.trim(),
       title: title,
+      detail: prevDetail,
       note: form.note.value.trim() || KIND_LABEL[form.kind.value]
     };
 
@@ -969,6 +984,7 @@
   /* --------------------------------------------------------------- profile */
   function applyProfile() {
     var form = $('#profileForm');
+    var prev = S.data.profile || {};
     var statement = form.statement.value
       .split(/\n\s*\n/)
       .map(function (s) { return s.trim(); })
@@ -987,6 +1003,12 @@
       portrait: form.portrait.value.trim(),
       manifesto: form.manifesto.value,
       statement: statement,
+      /* 영문 필드는 폼에 없으므로 기존 값을 그대로 넘긴다 */
+      statementEn: prev.statementEn || [],
+      bioEn: prev.bioEn || '',
+      genreEn: prev.genreEn || '',
+      basedIn: prev.basedIn || '',
+      characters: prev.characters || [],
       instagram: { handle: handle, url: url }
     };
 

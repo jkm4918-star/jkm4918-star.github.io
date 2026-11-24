@@ -1,3 +1,5 @@
 User-agent: *
-Disallow: /admin.html
 Allow: /
+Disallow: /admin.html
+
+Sitemap: https://jkm4918-star.github.io/sitemap.xml
