@@ -297,7 +297,7 @@
       desc.setAttribute('content',
         (p.name || 'Hedon139') + (p.nameKo ? '(' + p.nameKo + ')' : '') + ' — ' +
         '로맨틱 펑크(Romantic Punk) 그래피티·네오 팝아트 작가. ' +
-        '아기 천사 헨젤(Hanzel)과 아기 악마 헤빌(Hevil)로 사랑의 달콤함과 위험한 이면을 그립니다. ' +
+        '아기 천사 헨젤(Hangel)과 아기 악마 헤빌(Hevil)로 사랑의 달콤함과 위험한 이면을 그립니다. ' +
         '작품 ' + state.data.works.length + '점, 전시 ' + state.data.exhibitions.length + '회, ' +
         '벽화 ' + state.data.murals.length + '곳. 전시·벽화 의뢰는 인스타그램 DM.');
     }
